@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Toolkit</title>
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1> Student Toolkit</h1>
+        <div class="modules-grid">
+            <div class="module">
+                <h2> Калькулятор оценок</h2>
+                <div class="input-group">
+                    <label for="grades-input">Введите оценки (через запятую):</label>
+                    <input type="text" id="grades-input" placeholder="Пример: 5,4,3,5,4">
+                </div>
+                <button onclick="calculateGrades()">Посчитать</button>
+                <div id="grades-error" class="error"></div>
+                <div id="grades-result" class="result" style="display: none;">
+                    <div class="result-item">
+                        <span class="result-label">Средний балл:</span>
+                        <span class="result-value" id="avg-grade">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Максимальная:</span>
+                        <span class="result-value" id="max-grade">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Минимальная:</span>
+                        <span class="result-value" id="min-grade">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Количество оценок:</span>
+                        <span class="result-value" id="count-grade">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="module">
+                <h2>Конвертер температуры</h2>
+                <div class="input-group">
+                    <label for="temp-input">Введите температуру:</label>
+                    <input type="number" id="temp-input" placeholder="Например: 25" step="0.1">
+                </div>
+                <div class="input-group"
+                    <label for="temp-mode">Выберите режим:</label>
+                    <select id="temp-mode">
+                        <option value="c-to-f">°C → °F (Цельсий → Фаренгейт)</option>
+                        <option value="f-to-c">°F → °C (Фаренгейт → Цельсий)</option>
+                    </select>
+                </div>
+                <button onclick="convertTemperature()">Перевести</button>
+                <div id="temp-error" class="error"></div>
+                <div id="temp-result" class="result" style="display: none;">
+                    <div class="result-item">
+                        <span class="result-label">Результат:</span>
+                        <span class="result-value" id="temp-value">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="module">
+                <h2>ToDo-список</h2>
+                <div class="todo-input-group">
+                    <input type="text" id="todo-input" placeholder="Добавьте новое дело...">
+                    <button class="btn-add" onclick="addTodo()">Добавить</button>
+                </div>
+                <ul class="todo-list" id="todo-list"></ul>
+                <div class="empty-message" id="empty-message">Нет задач. Добавьте первую!</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function calculateGrades() {
+            const input = document.getElementById('grades-input').value.trim();
+            const errorDiv = document.getElementById('grades-error');
+            const resultDiv = document.getElementById('grades-result');
+            errorDiv.classList.remove('show');
+            errorDiv.textContent = '';
+            resultDiv.style.display = 'none';
+            if (!input) {
+                showError(errorDiv, 'Пожалуйста, введите оценки!');
+                return;
+            }
+            try {
+                const gradesStr = input.split(',').map(g => g.trim());
+                const grades = gradesStr.map(g => {
+                    const num = parseFloat(g);
+                    if (isNaN(num) || num < 0 || num > 5) {
+                        throw new Error('Оценки должны быть числами от 0 до 5');
+                    }
+                    return num;
+                });
+
+                if (grades.length === 0) {
+                    throw new Error('Введите хотя бы одну оценку');
+                }
+                const average = (grades.reduce((a, b) => a + b, 0) / grades.length).toFixed(2);
+                const max = Math.max(...grades);
+                const min = Math.min(...grades);
+                const count = grades.length;
+
+                document.getElementById('avg-grade').textContent = average;
+                document.getElementById('max-grade').textContent = max;
+                document.getElementById('min-grade').textContent = min;
+                document.getElementById('count-grade').textContent = count;
+
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                showError(errorDiv, error.message);
+            }
+        }
+        function convertTemperature() {
+            const input = document.getElementById('temp-input').value.trim();
+            const mode = document.getElementById('temp-mode').value;
+            const errorDiv = document.getElementById('temp-error');
+            const resultDiv = document.getElementById('temp-result');
+            errorDiv.classList.remove('show');
+            errorDiv.textContent = '';
+            resultDiv.style.display = 'none';
+            if (!input) {
+                showError(errorDiv, 'Пожалуйста, введите температуру!');
+                return;
+            }
+            try {
+                const temp = parseFloat(input);
+                if (isNaN(temp)) {
+                    throw new Error('Введите число!');
+                }
+                let result;
+                let unit;
+                if (mode === 'c-to-f') {
+                    result = (temp * 9/5 + 32).toFixed(2);
+                    unit = '°F';
+                } else {
+                    result = ((temp - 32) * 5/9).toFixed(2);
+                    unit = '°C';
+                }
+                document.getElementById('temp-value').textContent = result + ' ' + unit;
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                showError(errorDiv, error.message);
+            }
+        }
+        class TodoList {
+            constructor() {
+                this.todos = this.loadFromStorage();
+                this.render();
+            }
+            loadFromStorage() {
+                const saved = localStorage.getItem('todos');
+                return saved ? JSON.parse(saved) : [];
+            }
+            saveToStorage() {
+                localStorage.setItem('todos', JSON.stringify(this.todos));
+            }
+            addTodo(text) {
+                if (!text.trim()) return;
+                
+                const todo = {
+                    id: Date.now(),
+                    text: text.trim(),
+                    completed: false
+                };
+                this.todos.push(todo);
+                this.saveToStorage();
+                this.render();
+            }
+            toggleTodo(id) {
+                const todo = this.todos.find(t => t.id === id);
+                if (todo) {
+                    todo.completed = !todo.completed;
+                    this.saveToStorage();
+                    this.render();
+                }
+            }
+            deleteTodo(id) {
+                this.todos = this.todos.filter(t => t.id !== id);
+                this.saveToStorage();
+                this.render();
+            }
+            render() {
+                const list = document.getElementById('todo-list');
+                const emptyMsg = document.getElementById('empty-message');
+                list.innerHTML = '';
+                
+                if (this.todos.length === 0) {
+                    emptyMsg.style.display = 'block';
+                    return;
+                }
+                emptyMsg.style.display = 'none';
+                this.todos.forEach(todo => {
+                    const li = document.createElement('li');
+                    li.className = 'todo-item' + (todo.completed ? ' completed' : '');                    
+                    li.innerHTML = `
+                        <span class="todo-text">${escapeHtml(todo.text)}</span>
+                        <div class="todo-actions">
+                            <button class="btn-small btn-done ${todo.completed ? 'completed' : ''}" 
+                                    onclick="todoList.toggleTodo(${todo.id})">
+                                ${todo.completed ? '✓ Готово' : '○ Готово'}
+                            </button>
+                            <button class="btn-small btn-delete" onclick="todoList.deleteTodo(${todo.id})">
+                                🗑 Удалить    
+                    `;                    
+                    list.appendChild(li);
+                });
+            }
+        }
+        let todoList = new TodoList();
+        function addTodo() {
+            const input = document.getElementById('todo-input');
+            todoList.addTodo(input.value);
+            input.value = '';
+            input.focus();
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const todoInput = document.getElementById('todo-input');
+            todoInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addTodo();
+                }
+            }); 
+            const gradesInput = document.getElementById('grades-input');
+            gradesInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    calculateGrades();
+                }
+            });
+            const tempInput = document.getElementById('temp-input');
+            tempInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    convertTemperature();
+                }
+            });
+        });
+        function showError(element, message) {
+            element.textContent = message;
+            element.classList.add('show');
+        }
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>
