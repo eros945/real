@@ -1,0 +1,125 @@
+type User = [name: string, age: number, status: string];
+
+const user: User = ["Alex", 25, "admin"];
+
+type UserInfo = {
+  name: string;
+  age: number;
+};
+
+function greetUser(user: UserInfo): string {
+  return `Hello, ${user.name}! You are ${user.age} years old.`;
+}
+
+console.log(greetUser({ name: "Alex", age: 25 }));
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+const products: Product[] = [
+  { id: 1, name: "Laptop", price: 1200, quantity: 5 },
+  { id: 2, name: "Phone", price: 800, quantity: 10 },
+  { id: 3, name: "Keyboard", price: 100, quantity: 20 },
+];
+
+console.log("All products:", products);
+
+function getProductsAbovePrice(price: number): Product[] {
+  return products.filter(product => product.price > price);
+}
+
+console.log("Products above price:", getProductsAbovePrice(500));
+
+
+function calculateTotal(products: Product[]): number {
+  return products.reduce((total, product) => {
+    return total + product.price * product.quantity;
+  }, 0);
+}
+
+console.log("Total cost:", calculateTotal(products));
+
+abstract class StoreItem {
+  constructor(public id: number, public name: string) {}
+
+  abstract getInfo(): string;
+}
+
+class StoreProduct extends StoreItem implements Product {
+  constructor(
+    id: number,
+    name: string,
+    public price: number,
+    public quantity: number
+  ) {
+    super(id, name);
+  }
+
+  getInfo(): string {
+    return `${this.name} - $${this.price} (qty: ${this.quantity})`;
+  }
+}
+
+
+class ProductStore {  
+  private _products: StoreProduct[] = [];
+
+  get products(): StoreProduct[] {
+    return this._products;
+  }
+
+  set products(products: StoreProduct[]) {
+    this._products = products;
+  }
+
+  addProduct(product: StoreProduct): void {
+    this._products.push(product);
+  }
+
+  updateQuantity(id: number, quantity: number): void {
+    const product = this._products.find(p => p.id === id);
+    if (product) {
+      product.quantity = quantity;
+    }
+  }
+
+  removeProduct(id: number): void {
+    this._products = this._products.filter(p => p.id !== id);
+  }
+}
+
+const store = new ProductStore();
+
+store.addProduct(new StoreProduct(1, "Laptop", 1200, 5));
+store.addProduct(new StoreProduct(2, "Phone", 800, 10));
+
+store.updateQuantity(1, 7);
+store.removeProduct(2);
+
+console.log(store.products);
+
+const productDictionary: Record<number, Product> = {
+  1: { id: 1, name: "Laptop", price: 1200, quantity: 5 },
+  2: { id: 2, name: "Phone", price: 800, quantity: 10 },
+};
+
+console.log(productDictionary);
+
+
+
+C:\Program Files\nodejs\node.exe .\maint.js
+Hello, Alex! You are 25 years old.
+maint.js:20
+All products: (3) [{…}, {…}, {…}]
+maint.js:26
+Products above price: (2) [{…}, {…}]
+maint.js:30
+Total cost: 16000
+maint.js:36
+(1) [StoreProduct]
+maint.js:90
+{1: {…}, 2: {…}}
