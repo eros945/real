@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Магазин продуктов</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    h1 { color: #333; }
+    .section { margin-bottom: 30px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #f4f4f4; }
+  </style>
+</head>
+<body>
+  <h1>Магазин продуктов</h1>
+
+  <div class="section" id="greeting"></div>
+
+  <div class="section">
+    <h2>Все продукты</h2>
+    <div id="products"></div>
+  </div>
+
+  <div class="section">
+    <h2>Продукты дороже 500</h2>
+    <div id="products-above"></div>
+  </div>
+
+  <div class="section">
+    <h2>Общая стоимость</h2>
+    <div id="total"></div>
+  </div>
+
+  <div class="section">
+    <h2>ProductStore</h2>
+    <div id="store"></div>
+  </div>
+
+  <div class="section">
+    <h2>Словарь продуктов</h2>
+    <div id="dictionary"></div>
+  </div>
+
+  <script>
+    var __extends = (this && this.__extends) || (function () {
+      var extendStatics = function (d, b) {
+          extendStatics = Object.setPrototypeOf ||
+              ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+              function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+          return extendStatics(d, b);
+      };
+      return function (d, b) {
+          if (typeof b !== "function" && b !== null)
+              throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+          extendStatics(d, b);
+          function __() { this.constructor = d; }
+          d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+      };
+  })();
+  var user = ["Alex", 25, "admin"];
+  function greetUser(user) {
+      return "Hello, ".concat(user.name, "! You are ").concat(user.age, " years old.");
+  }
+  console.log(greetUser({ name: "Alex", age: 25 }));
+  var products = [
+      { id: 1, name: "Laptop", price: 1200, quantity: 5 },
+      { id: 2, name: "Phone", price: 800, quantity: 10 },
+      { id: 3, name: "Keyboard", price: 100, quantity: 20 },
+  ];
+  console.log("All products:", products);
+  function getProductsAbovePrice(price) {
+      return products.filter(function (product) { return product.price > price; });
+  }
+  console.log("Products above price:", getProductsAbovePrice(500));
+  function calculateTotal(products) {
+      return products.reduce(function (total, product) {
+          return total + product.price * product.quantity;
+      }, 0);
+  }
+  console.log("Total cost:", calculateTotal(products));
+  var StoreItem = (function () {
+      function StoreItem(id, name) {
+          this.id = id;
+          this.name = name;
+      }
+      return StoreItem;
+  }());
+  var StoreProduct = (function (_super) {
+      __extends(StoreProduct, _super);
+      function StoreProduct(id, name, price, quantity) {
+          var _this = _super.call(this, id, name) || this;
+          _this.price = price;
+          _this.quantity = quantity;
+          return _this;
+      }
+      StoreProduct.prototype.getInfo = function () {
+          return "".concat(this.name, " - $").concat(this.price, " (qty: ").concat(this.quantity, ")");
+      };
+      return StoreProduct;
+  }(StoreItem));
+  var ProductStore = (function () {
+      function ProductStore() {
+          this._products = [];
+      }
+      Object.defineProperty(ProductStore.prototype, "products", {
+          get: function () {
+              return this._products;
+          },
+          set: function (products) {
+              this._products = products;
+          },
+          enumerable: false,
+          configurable: true
+      });
+      ProductStore.prototype.addProduct = function (product) {
+          this._products.push(product);
+      };
+      ProductStore.prototype.updateQuantity = function (id, quantity) {
+          var product = this._products.find(function (p) { return p.id === id; });
+          if (product) {
+              product.quantity = quantity;
+          }
+      };
+      ProductStore.prototype.removeProduct = function (id) {
+          this._products = this._products.filter(function (p) { return p.id !== id; });
+      };
+      return ProductStore;
+  }());
+  var store = new ProductStore();
+  store.addProduct(new StoreProduct(1, "Laptop", 1200, 5));
+  store.addProduct(new StoreProduct(2, "Phone", 800, 10));
+  store.updateQuantity(1, 7);
+  store.removeProduct(2);
+  console.log(store.products);
+  var productDictionary = {
+      1: { id: 1, name: "Laptop", price: 1200, quantity: 5 },
+      2: { id: 2, name: "Phone", price: 800, quantity: 10 },
+  };
+  console.log(productDictionary);
+
+  </script>
+  <script>
+    document.getElementById('greeting').textContent = greetUser({ name: user[0], age: user[1] });
+    function renderProducts(products) {
+      let html = '<table><tr><th>ID</th><th>Название</th><th>Цена</th><th>Кол-во</th></tr>';
+      for (const p of products) {
+        html += `<tr><td>${p.id}</td><td>${p.name}</td><td>${p.price}</td><td>${p.quantity}</td></tr>`;
+      }
+      html += '</table>';
+      return html;
+    }
+    document.getElementById('products').innerHTML = renderProducts(products);
+    document.getElementById('products-above').innerHTML = renderProducts(getProductsAbovePrice(500));
+    document.getElementById('total').textContent = calculateTotal(products);
+    document.getElementById('store').innerHTML = renderProducts(store.products);
+    document.getElementById('dictionary').innerHTML = renderProducts(Object.values(productDictionary));
+  </script>
+</body>
+</html>
